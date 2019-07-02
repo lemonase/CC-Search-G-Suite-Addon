@@ -1,0 +1,433 @@
+<script type="text/javascript">
+  // DOM Variables
+  let mainContainer = document.getElementById("main-container");
+  let searchEl = document.getElementById("search_input");
+  let searchIcon = document.getElementById("search-icon");
+  let layoutDiv = document.querySelector('.mdl-layout');
+  let layoutBackButton = document.getElementById('layout-back-button');
+  // Prog. Bar
+  let mainProgressBar = document.createElement('div');
+  mainProgressBar.classList.add("mdl-progress", "mdl-js-progress", "mdl-progress__indeterminate");
+  mainProgressBar.style.zIndex = "100";
+  document.body.appendChild(mainProgressBar);
+
+  // CC API Variables
+  const licenses = ['BY-SA', 'BY-NC-SA', 'BY', 'BY-NC-ND', 'BY-ND', 'CC0', 'PDM', 'BY-NC'];
+  const license_types = ['allows commercial', 'allows modification'];
+  const providers = ['thorvaldsensmuseum', 'thingiverse', 'svgsilh', 'sciencemuseum', 'rijksmuseum', 'rawpixel', 'nypl', 'museumsvictoria', 'met', 'mccordmuseum', 'iha', 'geographorguk', 'floraon', 'flickr', 'eol', 'digitaltmuseum', 'deviantart', 'clevelandmuseum', 'brooklynmuseum', 'behance', 'animaldiversity', 'WoRMS', 'CAPL', '500px'];
+  let page_count = 1;
+  let providers_prefix = "provider=";
+  let licenses_prefix = "li=";
+  let license_types_prefix = "lt=";
+  let providers_args = "";
+  let licenses_args = "";
+  let license_types_args = "";
+
+  // Apps Script API Variables
+  let attribution = "";
+  let imagesInserted = 0;
+  let attributionLocation = {
+    footer: true,
+    image: false
+  }
+
+  async function queryApi(){
+    let providers_string = providers_prefix + providers_args;
+    let licenses_string = licenses_prefix + licenses_args;
+    let license_types_string = license_types_prefix + license_types_args;
+    let page_string = "page=" + page_count + "&";
+    if (page_count < 2){
+      page_string = "";
+    }
+
+    let api_url = "https://api.creativecommons.engineering/image/search?";
+    let query_string = page_string + "q=" + searchEl.value + "&" + providers_string + "&" + licenses_string + "&" + license_types_string + "&" + "searchBy";
+    let full_url = api_url + query_string;
+    let response = await fetch(full_url);
+
+    return await response.json();
+  }
+
+  async function queryImage(image_detail_url){
+    let response = await fetch(image_detail_url);
+    return await response.json();
+  }
+
+  function populateSettingsList(setting_name, options, listEl){
+    for (let i = 0; i < options.length; i++){
+      let listItem = document.createElement("li");
+      let leftSpan = document.createElement("span");
+      let rightSpan = document.createElement("span");
+      let rightLabel = document.createElement("label");
+      let rightInput = document.createElement("input");
+      listEl.appendChild(listItem);
+      listItem.appendChild(leftSpan);
+      listItem.appendChild(rightSpan);
+      rightSpan.appendChild(rightLabel);
+      rightLabel.appendChild(rightInput);
+      listItem.classList.add("mdl-list__item");
+      listItem.classList.add("mdl-collapse__content");
+      leftSpan.classList.add("mdl-list__item-primary-content");
+      leftSpan.innerText = options[i];
+
+      rightSpan.classList.add("mdl-list__item-secondary-action");
+      rightLabel.classList.add("mdl-checkbox", "mdl-js-checkbox", "mdl-js-ripple-effect");
+      rightLabel.setAttribute("for", "list-" + setting_name + "-checkbox-" + i+1);
+      rightInput.type = "checkbox";
+      rightInput.id = "list-" + setting_name + "-checkbox-" + i+1;
+      rightInput.classList.add("mdl-checkbox__input", setting_name + "-checkbox");
+
+      if (i == 0){
+        rightInput.addEventListener("click", function(){
+          attributionLocation.image = !attributionLocation.image;
+        });
+      }
+
+      if (i == 1){
+        rightInput.click();
+        rightInput.addEventListener("click", function(){
+          attributionLocation.footer = !attributionLocation.footer;
+        });
+      }
+
+
+      leftSpan.addEventListener("click", function(){
+        rightInput.click();
+      });
+
+    }
+  }
+
+  function populateFiltersList(short_string, list, listEl){
+    // Toggle button
+    let topListItem = document.createElement("li");
+    let topListButton = document.createElement("button");
+    let toggle = false;
+    topListItem.classList.add("mdl-list__item");
+    topListItem.classList.add("mdl-collapse__content");
+    topListItem.style.paddingTop = "0px";
+    topListButton.classList.add("mdl-button", "mdl-js-button", "mdl-button--raised", "mdl-button--primary", "mdl-js-ripple-effect");
+    topListButton.style.width = "100%";
+    topListButton.innerText = "Toggle All";
+    listEl.appendChild(topListItem);
+    topListItem.appendChild(topListButton);
+    topListItem.addEventListener("click", function(){
+      let boxes = document.getElementsByClassName(short_string + "-checkbox");
+      for (let i = 0; i < boxes.length; i++){
+        let box = boxes[i];
+        if (box.checked && !toggle){
+          box.click();
+        }
+        if (!box.checked && toggle){
+          box.click();
+        }
+        box.click();
+      }
+
+      toggle = !toggle;
+    });
+    // End toggle button
+
+    // Submenu Settings List
+    for (let i = 0; i < list.length; i++) {
+      let listItem = document.createElement("li");
+      let leftSpan = document.createElement("span");
+      let rightSpan = document.createElement("span");
+      let rightLabel = document.createElement("label");
+      let rightInput = document.createElement("input");
+
+      listEl.appendChild(listItem);
+      listItem.appendChild(leftSpan);
+      listItem.appendChild(rightSpan);
+      rightSpan.appendChild(rightLabel);
+      rightLabel.appendChild(rightInput);
+
+      listItem.classList.add("mdl-list__item");
+      listItem.classList.add("mdl-collapse__content");
+      leftSpan.classList.add("mdl-list__item-primary-content");
+      leftSpan.innerText = list[i];
+      rightSpan.classList.add("mdl-list__item-secondary-action");
+      rightLabel.classList.add("mdl-checkbox", "mdl-js-checkbox", "mdl-js-ripple-effect");
+      rightLabel.setAttribute("for", "list-" + short_string + "-checkbox-" + i+1);
+      rightInput.type = "checkbox";
+      rightInput.id = "list-" + short_string + "-checkbox-" + i+1;
+      rightInput.classList.add("mdl-checkbox__input", short_string + "-checkbox");
+
+      // No toggle all for license types
+      if (short_string === "lt") {
+        if (topListItem) {
+          topListItem.remove();
+        }
+      }
+
+      leftSpan.addEventListener("click", function(){
+        rightInput.click();
+      });
+
+      rightInput.addEventListener("change", function(){
+        let checkBoxString = list[i].toLowerCase();
+
+        function constructFilterString(filter_string, sub_string){
+          let output_array = filter_string.split(',');
+          if (output_array[0] === ""){
+            output_array = [];
+          }
+
+          let ind = output_array.indexOf(sub_string);
+          if (ind !== -1){
+            output_array.splice(ind,1);
+          }else{
+            output_array.push(sub_string);
+          }
+
+          return output_array.toString();
+        }
+
+        switch (short_string){
+          case("providers"):
+            providers_args = constructFilterString(providers_args, checkBoxString);
+            break;
+          case("li"):
+            licenses_args = constructFilterString(licenses_args, checkBoxString);
+            break;
+          case("lt"):
+            license_types_args = constructFilterString(license_types_args, checkBoxString);
+            break;
+          default:
+            console.error("Unknown short_string");
+            break;
+        }
+      });
+    }
+    // End list
+
+
+    // Toggle collapseable menus
+    document.querySelectorAll('.mdl-collapse__content').forEach(function(collapse){
+      // collapse.style.marginTop = '-' + collapse.offsetHeight.toString() + 'px';
+      collapse.style.marginTop = '-120px';
+    });
+    document.querySelectorAll('.mdl-collapse__button').forEach(function(button){
+      button.addEventListener('click', function(event){
+        button.parentNode.classList.toggle('mdl-collapse--opened');
+      });
+    });
+
+    // Toggle for licenses checkboxes
+    let lt_checkboxes = document.querySelectorAll('.lt-checkbox');
+    let li_checkboxes = document.querySelectorAll('.li-checkbox');
+    lt_checkboxes.forEach(function(lt_checkbox){
+      lt_checkbox.addEventListener('click', function(){
+        li_checkboxes.forEach(function(li_checkbox){
+          if (li_checkbox.parentNode.classList.contains("is-checked")){
+            li_checkbox.click();
+          }
+          li_checkbox.addEventListener('click', function(){
+            if (lt_checkbox.parentNode.classList.contains("is-checked")) {
+              lt_checkbox.click();
+            }
+          })
+        })
+      })
+    });
+
+    // Toggle for license_type checkboxes
+    lt_checkboxes.forEach(function(lt_checkbox){
+      lt_checkbox.addEventListener('click', function(){
+        lt_checkboxes.forEach(function(lt_c){
+          if (lt_c.parentNode.classList.contains("is-checked")){
+            lt_c.click();
+          }
+        })
+      })
+    })
+
+  }
+  // End of settings drawer
+
+  function clearImages(){
+    if (mainContainer.hasChildNodes()){
+      mainContainer.scrollTop = 0;
+      page_count = 1;
+      let firstEl = mainContainer.firstElementChild;
+      while (firstEl){
+        firstEl.remove();
+        firstEl = mainContainer.firstElementChild;
+      }
+    }
+  }
+
+  function showError(message){
+      let messageDiv = document.createElement("h6");
+      messageDiv.innerText = message;
+      messageDiv.style.color = "red";
+      messageDiv.style.textAlign = "center";
+      mainContainer.appendChild(messageDiv);
+  }
+
+  function addCardsToDOM(json){
+    // If no results are found display this message
+    if (json.result_count === 0 || json.results.length === 0){
+      showError("No images were found :(");
+    }
+
+    for (let i = 0; i < json.results.length; i++) {
+      let result = json.results[i];
+      function Card(){
+        //// Elements ////
+        this.div = document.createElement("div");
+        this.title_div = document.createElement("div");
+        this.title = document.createElement("div");
+        this.media_div = document.createElement("div");
+        this.actions_div = document.createElement("div");
+        this.actions = document.createElement("span");
+        this.add_button = document.createElement("button");
+        this.add_icon = document.createElement("i");
+        this.div.appendChild(this.title_div);
+        this.div.appendChild(this.media_div);
+        this.div.appendChild(this.actions_div);
+        this.title_div.appendChild(this.title);
+        this.media_div.appendChild(this.add_button);
+        this.add_button.appendChild(this.add_icon);
+        this.actions_div.appendChild(this.actions);
+
+        ////  Content  ////
+        this.title.innerHTML = "<b>" + result.title + "</b>" + "  <i>by</i>  " + "<b>" + result.creator + "</b>" + "  <i>license: </i>  " + "<b>" + result.license.toUpperCase() + " " + result.license_version + "</b>";
+        if (json.results[i].thumbnail) {
+          this.media_div.style.backgroundImage = "url(" + result.thumbnail + ")";
+        } else {
+          this.media_div.style.backgroundImage = "url(" + result.url + ")";
+        }
+
+        ////  Styles  ////
+        // Card Div Style
+        this.div.classList.add("mdl-card", "mdl-shadow--8dp");
+        this.div.style.width = "90%";
+        this.div.style.marginLeft = "5%";
+        this.div.style.marginBottom = "20px";
+        this.div.style.padding = "10px";
+        // Card Title Div Style
+        this.title_div.classList.add("mdl-card__title");
+        this.title_div.style.padding = "5px";
+        this.title.style.fontSize = "14px";
+        // Card Media Div Style
+        this.media_div.classList.add("mdl-card__media", "mdl-card--border");
+        this.media_div.style.height = "200px";
+        this.media_div.style.margin = "5px";
+        //Card Add Button Style
+        this.add_button.classList.add("mdl-button", "mdl-js-button", "mdl-button--fab", "mdl-button--mini-fab", "mdl-js-ripple-effect", "mdl-button--colored");
+        this.add_button.style.right = "8px";
+        this.add_button.style.bottom = "8px";
+        this.add_icon.classList.add("material-icons");
+        this.add_icon.innerText = "add";
+      }
+      let current_card = new Card();
+
+      function populateCardMenu(image_json) {
+        let anchorInnerTexts = [image_json.creator, "Image Landing Page", "Image URL", image_json.license.toUpperCase() + " " + image_json.license_version, image_json.provider, "CC Landing Page"];
+        let anchorHrefs = [image_json.creator_url, image_json.foreign_landing_url, image_json.url, image_json.license_url, image_json.provider_url, "https://ccsearch.creativecommons.org/photos/" + image_json.id];
+
+        function getCardMenuElements(element){
+          let elArray = [];
+          for (let i = 0; i <= 5; i++){
+            let el = document.createElement(element);
+            elArray.push(el);
+            if (element === "a"){
+              el.innerText = anchorInnerTexts[i];
+              el.href = anchorHrefs[i];
+              el.target = "_blank";
+            }
+          }
+          return elArray;
+        }
+
+        let cardMenuButtons = getCardMenuElements("button");
+        let cardMenuSpans = getCardMenuElements("span");
+        let cardMenuAnchors = getCardMenuElements("a");
+
+        cardMenuButtons.forEach((el,ind) => {
+          el.classList.add("mdl-chip");
+          el.appendChild(cardMenuSpans[ind]);
+          current_card.actions.appendChild(el);
+        });
+        cardMenuSpans.forEach((el,ind) => {
+          el.classList.add("mdl-chip__text");
+          el.appendChild(cardMenuAnchors[ind]);
+        });
+
+        current_card.add_button.addEventListener("click", function () {
+          let shortAttrib = "\"" + image_json.title + "\"" + " by " + image_json.creator + " is licensed under CC " + image_json.license.toUpperCase() + " " + image_json.license_version + ".";
+          google.script.run.insertImage(result.url, shortAttrib, imagesInserted + 1, attributionLocation);
+          imagesInserted++;
+        });
+      }
+
+      // Gets individual card details in json form
+      queryImage(result.detail).then(image_details => populateCardMenu(image_details));
+      // Append the card to the main div
+      mainContainer.appendChild(current_card.div);
+    } // end for loop
+
+    mainContainer.addEventListener('scroll', function(e){
+      let container = e.target;
+      if (container.scrollHeight - container.scrollTop === container.clientHeight){
+        if (page_count < json.page_count){
+          page_count++;
+          queryApi().then(data => addCardsToDOM(data));
+        }
+      }
+    });
+
+    mainProgressBar.hidden = true;
+  } //addCardsToDom
+
+
+  function initSettingsDrawer() {
+    layoutBackButton.addEventListener("click", function(e){
+      layoutDiv.MaterialLayout.toggleDrawer();
+    });
+
+    let licensesListEl = document.getElementById("license_list");
+    let licenseTypeListEl = document.getElementById("license_type_list");
+    let providersListEl = document.getElementById("providers_list");
+
+    let attributionLocationEl = document.getElementById("attribution_location_list");
+
+    populateFiltersList("li", licenses.sort().reverse(), licensesListEl);
+    populateFiltersList("lt", license_types, licenseTypeListEl);
+    populateFiltersList("providers", providers.sort(), providersListEl);
+
+    populateSettingsList("attribution_location", ["Image", "Footer"], attributionLocationEl);
+  }
+
+  function initSearchInput(){
+    function doInit(){
+      mainProgressBar.hidden = false;
+      clearImages();
+      if (!searchEl.value){
+        showError("Please enter a search query");
+        mainProgressBar.hidden = true;
+        return;
+      }
+      queryApi().then(data => addCardsToDOM(data));
+    }
+
+    searchEl.addEventListener("keypress", function(e){
+      if(e.code === "Enter"){
+        doInit();
+      }
+    });
+
+    searchIcon.addEventListener("click", function(e){
+      doInit();
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", function(e){
+    initSettingsDrawer();
+    initSearchInput();
+    mainProgressBar.hidden = true;
+    layoutDiv.hidden = false;
+  });
+
+</script>
