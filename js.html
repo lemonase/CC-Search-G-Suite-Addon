@@ -11,10 +11,44 @@
   mainProgressBar.style.zIndex = "100";
   document.body.appendChild(mainProgressBar);
 
-  // CC API Variables
-  const licenses = ['BY-SA', 'BY-NC-SA', 'BY', 'BY-NC-ND', 'BY-ND', 'CC0', 'PDM', 'BY-NC'];
+  // CC Catalog API Variables
+  const licenses = [
+    'BY-SA',
+    'BY-NC-SA',
+    'BY',
+    'BY-NC-ND',
+    'BY-ND',
+    'CC0',
+    'PDM',
+    'BY-NC'
+  ];
   const license_types = ['allows commercial', 'allows modification'];
-  const providers = ['thorvaldsensmuseum', 'thingiverse', 'svgsilh', 'sciencemuseum', 'rijksmuseum', 'rawpixel', 'nypl', 'museumsvictoria', 'met', 'mccordmuseum', 'iha', 'geographorguk', 'floraon', 'flickr', 'eol', 'digitaltmuseum', 'deviantart', 'clevelandmuseum', 'brooklynmuseum', 'behance', 'animaldiversity', 'WoRMS', 'CAPL', '500px'];
+  const providers = [
+    'thorvaldsensmuseum',
+    'thingiverse',
+    'svgsilh',
+    'sciencemuseum',
+    'rijksmuseum',
+    'rawpixel',
+    'nypl',
+    'museumsvictoria',
+    'met',
+    'mccordmuseum',
+    'iha',
+    'geographorguk',
+    'floraon',
+    'flickr',
+    'eol',
+    'digitaltmuseum',
+    'deviantart',
+    'clevelandmuseum',
+    'brooklynmuseum',
+    'behance',
+    'animaldiversity',
+    'WoRMS',
+    'CAPL',
+    '500px'
+  ];
   let page_count = 1;
   let providers_prefix = "provider=";
   let licenses_prefix = "li=";
