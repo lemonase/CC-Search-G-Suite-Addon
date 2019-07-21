@@ -5,6 +5,7 @@
   let searchIcon = document.getElementById("search-icon");
   let layoutDiv = document.querySelector('.mdl-layout');
   let layoutBackButton = document.getElementById('layout-back-button');
+
   // Prog. Bar
   let mainProgressBar = document.createElement('div');
   mainProgressBar.classList.add("mdl-progress", "mdl-js-progress", "mdl-progress__indeterminate");
@@ -22,7 +23,7 @@
     'PDM',
     'BY-NC'
   ];
-  const license_types = ['allows commercial', 'allows modification'];
+  const license_types = ['commercial', 'modification'];
   const providers = [
     'thorvaldsensmuseum',
     'thingiverse',
@@ -63,7 +64,7 @@
   let attributionLocation = {
     footer: true,
     image: false
-  }
+  };
 
   async function queryApi(){
     let providers_string = providers_prefix + providers_args;
@@ -248,6 +249,7 @@
     });
 
     // Toggle for licenses checkboxes
+    // TODO this works for now, but I don't like it
     let lt_checkboxes = document.querySelectorAll('.lt-checkbox');
     let li_checkboxes = document.querySelectorAll('.li-checkbox');
     lt_checkboxes.forEach(function(lt_checkbox){
@@ -264,17 +266,6 @@
         })
       })
     });
-
-    // Toggle for license_type checkboxes
-    lt_checkboxes.forEach(function(lt_checkbox){
-      lt_checkbox.addEventListener('click', function(){
-        lt_checkboxes.forEach(function(lt_c){
-          if (lt_c.parentNode.classList.contains("is-checked")){
-            lt_c.click();
-          }
-        })
-      })
-    })
 
   }
   // End of settings drawer
@@ -299,6 +290,8 @@
       mainContainer.appendChild(messageDiv);
   }
 
+  // TODO find a better way to write this whole function
+  // so it's shorter and less confusing. Can definitely be broken up.
   function addCardsToDOM(json){
     // If no results are found display this message
     if (json.result_count === 0 || json.results.length === 0){
@@ -358,8 +351,19 @@
       let current_card = new Card();
 
       function populateCardMenu(image_json) {
-        let anchorInnerTexts = [image_json.creator, "Image Landing Page", "Image URL", image_json.license.toUpperCase() + " " + image_json.license_version, image_json.provider, "CC Landing Page"];
-        let anchorHrefs = [image_json.creator_url, image_json.foreign_landing_url, image_json.url, image_json.license_url, image_json.provider_url, "https://ccsearch.creativecommons.org/photos/" + image_json.id];
+        let anchorInnerTexts = [image_json.creator,
+          "Image Landing Page",
+          "Image URL",
+          image_json.license.toUpperCase() + " " + image_json.license_version,
+          image_json.provider,
+          "CC Landing Page"];
+
+        let anchorHrefs = [image_json.creator_url,
+          image_json.foreign_landing_url,
+          image_json.url,
+          image_json.license_url,
+          image_json.provider_url,
+          "https://ccsearch.creativecommons.org/photos/" + image_json.id];
 
         function getCardMenuElements(element){
           let elArray = [];
@@ -379,6 +383,7 @@
         let cardMenuSpans = getCardMenuElements("span");
         let cardMenuAnchors = getCardMenuElements("a");
 
+        // Add chip class to each card menu item
         cardMenuButtons.forEach((el,ind) => {
           el.classList.add("mdl-chip");
           el.appendChild(cardMenuSpans[ind]);
@@ -389,6 +394,8 @@
           el.appendChild(cardMenuAnchors[ind]);
         });
 
+        // When add button is clicked create attribution string and send it to the google script runner.
+        // https://developers.google.com/apps-script/guides/html/reference/run
         current_card.add_button.addEventListener("click", function () {
           let shortAttrib = "\"" + image_json.title + "\"" + " by " + image_json.creator + " is licensed under CC " + image_json.license.toUpperCase() + " " + image_json.license_version + ".";
           google.script.run.insertImage(result.url, shortAttrib, imagesInserted + 1, attributionLocation);
@@ -396,12 +403,13 @@
         });
       }
 
-      // Gets individual card details in json form
+      // Gets individual card details in json form and uses them in the card menu
       queryImage(result.detail).then(image_details => populateCardMenu(image_details));
       // Append the card to the main div
       mainContainer.appendChild(current_card.div);
     } // end for loop
 
+    // Loads more data when the bottom is reached
     mainContainer.addEventListener('scroll', function(e){
       let container = e.target;
       if (container.scrollHeight - container.scrollTop === container.clientHeight){
@@ -416,6 +424,7 @@
   } //addCardsToDom
 
 
+  // Adds content to the settings drawer
   function initSettingsDrawer() {
     layoutBackButton.addEventListener("click", function(e){
       layoutDiv.MaterialLayout.toggleDrawer();
@@ -427,13 +436,16 @@
 
     let attributionLocationEl = document.getElementById("attribution_location_list");
 
+    // Adds the content (buttons and labels) to the filter settings menu
     populateFiltersList("li", licenses.sort().reverse(), licensesListEl);
     populateFiltersList("lt", license_types, licenseTypeListEl);
     populateFiltersList("providers", providers.sort(), providersListEl);
 
+    // Adds other settings to the settings menu
     populateSettingsList("attribution_location", ["Image", "Footer"], attributionLocationEl);
   }
 
+  // Initialize search bar
   function initSearchInput(){
     function doInit(){
       mainProgressBar.hidden = false;
@@ -457,6 +469,7 @@
     });
   }
 
+  // Wait for initial DOM to load before populating it with JS
   document.addEventListener("DOMContentLoaded", function(e){
     initSettingsDrawer();
     initSearchInput();
