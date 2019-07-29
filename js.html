@@ -67,21 +67,27 @@
 
   // Function which queries the CC-Catalog API 
   async function queryApi(){
+
+    // Individual parts of the URL
+    let api_url = "https://api.creativecommons.engineering/image/search?";
+    let page_string = "page=" + page_count + "&";
+    // 1st page is non-explicit
+    if (page_count < 2){
+      page_string = "";
+    }
+    let search_string = searchEl.value;
     let providers_string = providers_prefix + providers_args;
     let licenses_string = licenses_prefix + licenses_args;
     let license_types_string = license_types_prefix + license_types_args;
 
-    let page_string = "page=" + page_count + "&";
+    // Construct the query string
+    let query_string = page_string + "q=" + search_string + "&" + providers_string + "&" + licenses_string + "&" + license_types_string + "&" + "searchBy";
 
-    if (page_count < 2){
-      page_string = "";
-    }
-
-    let api_url = "https://api.creativecommons.engineering/image/search?";
-    let query_string = page_string + "q=" + searchEl.value + "&" + providers_string + "&" + licenses_string + "&" + license_types_string + "&" + "searchBy";
+    // And finally the full URL for the request
     let full_url = api_url + query_string;
-    let response = await fetch(full_url);
 
+    // Fetch and return JSON
+    let response = await fetch(full_url);
     return await response.json();
   }
 
@@ -119,12 +125,14 @@
       rightInput.id = "list-" + setting_name + "-checkbox-" + i+1;
       rightInput.classList.add("mdl-checkbox__input", setting_name + "-checkbox");
 
+      // Toggles attribution over the inserted image
       if (i == 0){
         rightInput.addEventListener("click", function(){
           attributionLocation.image = !attributionLocation.image;
         });
       }
 
+      // Toggles attribution in the footer of the slide
       if (i == 1){
         rightInput.click();
         rightInput.addEventListener("click", function(){
@@ -132,7 +140,7 @@
         });
       }
 
-
+      // Make the left span also click the checkbox
       leftSpan.addEventListener("click", function(){
         rightInput.click();
       });
