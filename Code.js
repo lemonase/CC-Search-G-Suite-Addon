@@ -70,3 +70,4 @@ function insertImage(url, attribution, numImages, attribLoc){
   }
 
 }
+

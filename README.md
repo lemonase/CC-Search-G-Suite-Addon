@@ -18,3 +18,4 @@ They instead get included by being inlined in index.html.
 
 Inspiration for this project originally came from [GSoC 2019](https://summerofcode.withgoogle.com/)
 and the lack of decent image searching add-ons in the store.
+
