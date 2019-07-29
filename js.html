@@ -25,28 +25,28 @@
   ];
   const license_types = ['commercial', 'modification'];
   const providers = [
-		'animaldiversity',
-		'behance',
-		'brooklynmuseum',
-		'CAPL',
-		'clevelandmuseum',
-		'deviantart',
-		'digitaltmuseum',
-		'flickr',
-		'floraon',
-		'sciencemuseum',
-		'rijksmuseum',
-		'wikimedia',
-		'thorvaldsensmuseum',
-		'svgsilh',
-		'thingiverse',
-		'geographorguk',
-		'mccordmuseum',
-		'met',
-		'museumsvictoria',
-		'phylopic',
-		'rawpixel',
-		'WoRMS'
+    'animaldiversity',
+    'behance',
+    'brooklynmuseum',
+    'CAPL',
+    'clevelandmuseum',
+    'deviantart',
+    'digitaltmuseum',
+    'flickr',
+    'floraon',
+    'sciencemuseum',
+    'rijksmuseum',
+    'wikimedia',
+    'thorvaldsensmuseum',
+    'svgsilh',
+    'thingiverse',
+    'geographorguk',
+    'mccordmuseum',
+    'met',
+    'museumsvictoria',
+    'phylopic',
+    'rawpixel',
+    'WoRMS'
   ];
 
   let page_count = 1;
@@ -65,6 +65,7 @@
     image: false
   };
 
+  // Function which queries the CC-Catalog API 
   async function queryApi(){
     let providers_string = providers_prefix + providers_args;
     let licenses_string = licenses_prefix + licenses_args;
@@ -84,11 +85,13 @@
     return await response.json();
   }
 
+  // Function that grabs image details with data from search query
   async function queryImage(image_detail_url){
     let response = await fetch(image_detail_url);
     return await response.json();
   }
 
+  // Creates settings other than filters in the Settings Sidebar
   function populateSettingsList(setting_name, options, listEl){
     for (let i = 0; i < options.length; i++){
       let listItem = document.createElement("li");
@@ -96,13 +99,16 @@
       let rightSpan = document.createElement("span");
       let rightLabel = document.createElement("label");
       let rightInput = document.createElement("input");
+
       listEl.appendChild(listItem);
       listItem.appendChild(leftSpan);
       listItem.appendChild(rightSpan);
       rightSpan.appendChild(rightLabel);
       rightLabel.appendChild(rightInput);
+
       listItem.classList.add("mdl-list__item");
       listItem.classList.add("mdl-collapse__content");
+
       leftSpan.classList.add("mdl-list__item-primary-content");
       leftSpan.innerText = options[i];
 
@@ -139,6 +145,7 @@
     let topListItem = document.createElement("li");
     let topListButton = document.createElement("button");
     let toggle = false;
+
     topListItem.classList.add("mdl-list__item");
     topListItem.classList.add("mdl-collapse__content");
     topListItem.style.paddingTop = "0px";
@@ -189,17 +196,14 @@
       rightInput.id = "list-" + short_string + "-checkbox-" + i+1;
       rightInput.classList.add("mdl-checkbox__input", short_string + "-checkbox");
 
-      // No toggle all for license types
+      // No toggle all for license types (there's only two)
       if (short_string === "lt") {
         if (topListItem) {
           topListItem.remove();
         }
       }
 
-      leftSpan.addEventListener("click", function(){
-        rightInput.click();
-      });
-
+      // Adds/removes specific substring from each type of filter when clicked
       rightInput.addEventListener("change", function(){
         let checkBoxString = list[i];
 
@@ -234,9 +238,13 @@
             break;
         }
       });
-    }
-    // End list
 
+      // Clicking the left span should toggle the checkbox
+      leftSpan.addEventListener("click", function(){
+        rightInput.click();
+      });
+
+    } // End list
 
     // Toggle collapseable menus
     document.querySelectorAll('.mdl-collapse__content').forEach(function(collapse){
@@ -250,7 +258,7 @@
     });
 
     // Toggle for licenses checkboxes
-    // TODO this works for now, but I don't like it
+    // TODO this works for now, but is bad practice
     let lt_checkboxes = document.querySelectorAll('.lt-checkbox');
     let li_checkboxes = document.querySelectorAll('.li-checkbox');
     lt_checkboxes.forEach(function(lt_checkbox){
@@ -271,6 +279,7 @@
   }
   // End of settings drawer
 
+  // Removes everything from the main container
   function clearImages(){
     if (mainContainer.hasChildNodes()){
       mainContainer.scrollTop = 0;
@@ -283,6 +292,7 @@
     }
   }
 
+  // Shows a big red error message
   function showError(message){
       let messageDiv = document.createElement("h6");
       messageDiv.innerText = message;
@@ -366,7 +376,8 @@
           "Image URL",
           image_json.license.toUpperCase() + " " + image_json.license_version,
           image_json.provider,
-          "CC Landing Page"];
+          "CC Landing Page"
+        ];
 
         let anchorHrefs = [
 					image_json.creator_url,
@@ -374,7 +385,8 @@
           image_json.url,
           image_json.license_url,
           image_json.provider_url,
-          "https://ccsearch.creativecommons.org/photos/" + image_json.id];
+          "https://ccsearch.creativecommons.org/photos/" + image_json.id
+        ];
 
         function getCardMenuElements(element){
           let elArray = [];
@@ -418,11 +430,13 @@
 
       // Gets individual card details in json form and uses them in the card menu
       queryImage(result.detail).then(image_details => populateCardMenu(image_details));
+
       // Append the card to the main div
       mainContainer.appendChild(current_card.div);
-    } // end for loop
 
-    // Loads more data when the bottom is reached
+    } // End loop for JSON results
+
+    // Loads more data when the bottom of the container is reached
     mainContainer.addEventListener('scroll', function(e){
       let container = e.target;
       if (container.scrollHeight - container.scrollTop === container.clientHeight){
@@ -434,10 +448,10 @@
     });
 
     mainProgressBar.hidden = true;
-  } //addCardsToDom
+  } // End addCardsToDom
 
 
-  // Adds content to the settings drawer
+  // Sets up settings drawer and adds initial content
   function initSettingsDrawer() {
     layoutBackButton.addEventListener("click", function(e){
       layoutDiv.MaterialLayout.toggleDrawer();
@@ -460,7 +474,8 @@
 
   // Initialize search bar
   function initSearchInput(){
-    function doInit(){
+
+    function doSearch(){
       mainProgressBar.hidden = false;
       clearImages();
       if (!searchEl.value){
@@ -473,13 +488,14 @@
 
     searchEl.addEventListener("keypress", function(e){
       if(e.code === "Enter"){
-        doInit();
+        doSearch();
       }
     });
 
     searchIcon.addEventListener("click", function(e){
-      doInit();
+      doSearch();
     });
+
   }
 
   // Wait for initial DOM to load before populating it with JS
