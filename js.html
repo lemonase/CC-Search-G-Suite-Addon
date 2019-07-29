@@ -25,31 +25,30 @@
   ];
   const license_types = ['commercial', 'modification'];
   const providers = [
-    'thorvaldsensmuseum',
-    'thingiverse',
-    'svgsilh',
-    'sciencemuseum',
-    'rijksmuseum',
-    'rawpixel',
-    'nypl',
-    'museumsvictoria',
-    'met',
-    'mccordmuseum',
-    'iha',
-    'geographorguk',
-    'floraon',
-    'flickr',
-    'eol',
-    'digitaltmuseum',
-    'deviantart',
-    'clevelandmuseum',
-    'brooklynmuseum',
-    'behance',
-    'animaldiversity',
-    'WoRMS',
-    'CAPL',
-    '500px'
+		'animaldiversity',
+		'behance',
+		'brooklynmuseum',
+		'CAPL',
+		'clevelandmuseum',
+		'deviantart',
+		'digitaltmuseum',
+		'flickr',
+		'floraon',
+		'sciencemuseum',
+		'rijksmuseum',
+		'wikimedia',
+		'thorvaldsensmuseum',
+		'svgsilh',
+		'thingiverse',
+		'geographorguk',
+		'mccordmuseum',
+		'met',
+		'museumsvictoria',
+		'phylopic',
+		'rawpixel',
+		'WoRMS'
   ];
+
   let page_count = 1;
   let providers_prefix = "provider=";
   let licenses_prefix = "li=";
@@ -70,7 +69,9 @@
     let providers_string = providers_prefix + providers_args;
     let licenses_string = licenses_prefix + licenses_args;
     let license_types_string = license_types_prefix + license_types_args;
+
     let page_string = "page=" + page_count + "&";
+
     if (page_count < 2){
       page_string = "";
     }
@@ -200,7 +201,7 @@
       });
 
       rightInput.addEventListener("change", function(){
-        let checkBoxString = list[i].toLowerCase();
+        let checkBoxString = list[i];
 
         function constructFilterString(filter_string, sub_string){
           let output_array = filter_string.split(',');
@@ -288,15 +289,23 @@
       messageDiv.style.color = "red";
       messageDiv.style.textAlign = "center";
       mainContainer.appendChild(messageDiv);
+			mainProgressBar.hidden = true;
   }
 
   // TODO find a better way to write this whole function
   // so it's shorter and less confusing. Can definitely be broken up.
   function addCardsToDOM(json){
+		if (!json){
+			showError("API Query Failed :(");
+		}
+		if (json.validation_error){
+			showError("Validation Error (Check Filters)");
+		}
     // If no results are found display this message
     if (json.result_count === 0 || json.results.length === 0){
       showError("No images were found :(");
     }
+
 
     for (let i = 0; i < json.results.length; i++) {
       let result = json.results[i];
@@ -351,14 +360,16 @@
       let current_card = new Card();
 
       function populateCardMenu(image_json) {
-        let anchorInnerTexts = [image_json.creator,
+        let anchorInnerTexts = [
+					image_json.creator,
           "Image Landing Page",
           "Image URL",
           image_json.license.toUpperCase() + " " + image_json.license_version,
           image_json.provider,
           "CC Landing Page"];
 
-        let anchorHrefs = [image_json.creator_url,
+        let anchorHrefs = [
+					image_json.creator_url,
           image_json.foreign_landing_url,
           image_json.url,
           image_json.license_url,
@@ -368,12 +379,14 @@
         function getCardMenuElements(element){
           let elArray = [];
           for (let i = 0; i <= 5; i++){
-            let el = document.createElement(element);
-            elArray.push(el);
-            if (element === "a"){
-              el.innerText = anchorInnerTexts[i];
-              el.href = anchorHrefs[i];
-              el.target = "_blank";
+            if (anchorHrefs[i]){
+              let el = document.createElement(element);
+              elArray.push(el);
+              if (element === "a"){
+                el.innerText = anchorInnerTexts[i];
+                el.href = anchorHrefs[i];
+                el.target = "_blank";
+              }
             }
           }
           return elArray;
