@@ -66,13 +66,13 @@
   };
 
   // Function which queries the CC-Catalog API 
-  async function queryApi(){
+  async function queryApi() {
 
     // Individual parts of the URL
     let api_url = "https://api.creativecommons.engineering/image/search?";
     let page_string = "page=" + page_count + "&";
     // 1st page is non-explicit
-    if (page_count < 2){
+    if (page_count < 2) {
       page_string = "";
     }
     let search_string = searchEl.value;
@@ -81,7 +81,8 @@
     let license_types_string = license_types_prefix + license_types_args;
 
     // Construct the query string
-    let query_string = page_string + "q=" + search_string + "&" + providers_string + "&" + licenses_string + "&" + license_types_string + "&" + "searchBy";
+    let query_string = page_string + "q=" + search_string + "&" + providers_string + "&" + licenses_string + "&" +
+      license_types_string + "&" + "searchBy";
 
     // And finally the full URL for the request
     let full_url = api_url + query_string;
@@ -92,14 +93,14 @@
   }
 
   // Function that grabs image details with data from search query
-  async function queryImage(image_detail_url){
+  async function queryImage(image_detail_url) {
     let response = await fetch(image_detail_url);
     return await response.json();
   }
 
   // Creates settings other than filters in the Settings Sidebar
-  function populateSettingsList(setting_name, options, listEl){
-    for (let i = 0; i < options.length; i++){
+  function populateSettingsList(setting_name, options, listEl) {
+    for (let i = 0; i < options.length; i++) {
       let listItem = document.createElement("li");
       let leftSpan = document.createElement("span");
       let rightSpan = document.createElement("span");
@@ -120,35 +121,35 @@
 
       rightSpan.classList.add("mdl-list__item-secondary-action");
       rightLabel.classList.add("mdl-checkbox", "mdl-js-checkbox", "mdl-js-ripple-effect");
-      rightLabel.setAttribute("for", "list-" + setting_name + "-checkbox-" + i+1);
+      rightLabel.setAttribute("for", "list-" + setting_name + "-checkbox-" + i + 1);
       rightInput.type = "checkbox";
-      rightInput.id = "list-" + setting_name + "-checkbox-" + i+1;
+      rightInput.id = "list-" + setting_name + "-checkbox-" + i + 1;
       rightInput.classList.add("mdl-checkbox__input", setting_name + "-checkbox");
 
       // Toggles attribution over the inserted image
-      if (i == 0){
-        rightInput.addEventListener("click", function(){
+      if (i == 0) {
+        rightInput.addEventListener("click", function () {
           attributionLocation.image = !attributionLocation.image;
         });
       }
 
       // Toggles attribution in the footer of the slide
-      if (i == 1){
+      if (i == 1) {
         rightInput.click();
-        rightInput.addEventListener("click", function(){
+        rightInput.addEventListener("click", function () {
           attributionLocation.footer = !attributionLocation.footer;
         });
       }
 
       // Make the left span also click the checkbox
-      leftSpan.addEventListener("click", function(){
+      leftSpan.addEventListener("click", function () {
         rightInput.click();
       });
 
     }
   }
 
-  function populateFiltersList(short_string, list, listEl){
+  function populateFiltersList(short_string, list, listEl) {
     // Toggle button
     let topListItem = document.createElement("li");
     let topListButton = document.createElement("button");
@@ -157,19 +158,20 @@
     topListItem.classList.add("mdl-list__item");
     topListItem.classList.add("mdl-collapse__content");
     topListItem.style.paddingTop = "0px";
-    topListButton.classList.add("mdl-button", "mdl-js-button", "mdl-button--raised", "mdl-button--primary", "mdl-js-ripple-effect");
+    topListButton.classList.add("mdl-button", "mdl-js-button", "mdl-button--raised", "mdl-button--primary",
+      "mdl-js-ripple-effect");
     topListButton.style.width = "100%";
     topListButton.innerText = "Toggle All";
     listEl.appendChild(topListItem);
     topListItem.appendChild(topListButton);
-    topListItem.addEventListener("click", function(){
+    topListItem.addEventListener("click", function () {
       let boxes = document.getElementsByClassName(short_string + "-checkbox");
-      for (let i = 0; i < boxes.length; i++){
+      for (let i = 0; i < boxes.length; i++) {
         let box = boxes[i];
-        if (box.checked && !toggle){
+        if (box.checked && !toggle) {
           box.click();
         }
-        if (!box.checked && toggle){
+        if (!box.checked && toggle) {
           box.click();
         }
         box.click();
@@ -199,9 +201,9 @@
       leftSpan.innerText = list[i];
       rightSpan.classList.add("mdl-list__item-secondary-action");
       rightLabel.classList.add("mdl-checkbox", "mdl-js-checkbox", "mdl-js-ripple-effect");
-      rightLabel.setAttribute("for", "list-" + short_string + "-checkbox-" + i+1);
+      rightLabel.setAttribute("for", "list-" + short_string + "-checkbox-" + i + 1);
       rightInput.type = "checkbox";
-      rightInput.id = "list-" + short_string + "-checkbox-" + i+1;
+      rightInput.id = "list-" + short_string + "-checkbox-" + i + 1;
       rightInput.classList.add("mdl-checkbox__input", short_string + "-checkbox");
 
       // No toggle all for license types (there's only two)
@@ -212,33 +214,33 @@
       }
 
       // Adds/removes specific substring from each type of filter when clicked
-      rightInput.addEventListener("change", function(){
+      rightInput.addEventListener("change", function () {
         let checkBoxString = list[i];
 
-        function constructFilterString(filter_string, sub_string){
+        function constructFilterString(filter_string, sub_string) {
           let output_array = filter_string.split(',');
-          if (output_array[0] === ""){
+          if (output_array[0] === "") {
             output_array = [];
           }
 
           let ind = output_array.indexOf(sub_string);
-          if (ind !== -1){
-            output_array.splice(ind,1);
-          }else{
+          if (ind !== -1) {
+            output_array.splice(ind, 1);
+          } else {
             output_array.push(sub_string);
           }
 
           return output_array.toString();
         }
 
-        switch (short_string){
-          case("providers"):
+        switch (short_string) {
+          case ("providers"):
             providers_args = constructFilterString(providers_args, checkBoxString);
             break;
-          case("li"):
+          case ("li"):
             licenses_args = constructFilterString(licenses_args, checkBoxString);
             break;
-          case("lt"):
+          case ("lt"):
             license_types_args = constructFilterString(license_types_args, checkBoxString);
             break;
           default:
@@ -248,19 +250,19 @@
       });
 
       // Clicking the left span should toggle the checkbox
-      leftSpan.addEventListener("click", function(){
+      leftSpan.addEventListener("click", function () {
         rightInput.click();
       });
 
     } // End list
 
     // Toggle collapseable menus
-    document.querySelectorAll('.mdl-collapse__content').forEach(function(collapse){
+    document.querySelectorAll('.mdl-collapse__content').forEach(function (collapse) {
       // collapse.style.marginTop = '-' + collapse.offsetHeight.toString() + 'px';
       collapse.style.marginTop = '-120px';
     });
-    document.querySelectorAll('.mdl-collapse__button').forEach(function(button){
-      button.addEventListener('click', function(event){
+    document.querySelectorAll('.mdl-collapse__button').forEach(function (button) {
+      button.addEventListener('click', function (event) {
         button.parentNode.classList.toggle('mdl-collapse--opened');
       });
     });
@@ -269,13 +271,13 @@
     // TODO this works for now, but is bad practice
     let lt_checkboxes = document.querySelectorAll('.lt-checkbox');
     let li_checkboxes = document.querySelectorAll('.li-checkbox');
-    lt_checkboxes.forEach(function(lt_checkbox){
-      lt_checkbox.addEventListener('click', function(){
-        li_checkboxes.forEach(function(li_checkbox){
-          if (li_checkbox.parentNode.classList.contains("is-checked")){
+    lt_checkboxes.forEach(function (lt_checkbox) {
+      lt_checkbox.addEventListener('click', function () {
+        li_checkboxes.forEach(function (li_checkbox) {
+          if (li_checkbox.parentNode.classList.contains("is-checked")) {
             li_checkbox.click();
           }
-          li_checkbox.addEventListener('click', function(){
+          li_checkbox.addEventListener('click', function () {
             if (lt_checkbox.parentNode.classList.contains("is-checked")) {
               lt_checkbox.click();
             }
@@ -288,12 +290,12 @@
   // End of settings drawer
 
   // Removes everything from the main container
-  function clearImages(){
-    if (mainContainer.hasChildNodes()){
+  function clearImages() {
+    if (mainContainer.hasChildNodes()) {
       mainContainer.scrollTop = 0;
       page_count = 1;
       let firstEl = mainContainer.firstElementChild;
-      while (firstEl){
+      while (firstEl) {
         firstEl.remove();
         firstEl = mainContainer.firstElementChild;
       }
@@ -301,33 +303,34 @@
   }
 
   // Shows a big red error message
-  function showError(message){
-      let messageDiv = document.createElement("h6");
-      messageDiv.innerText = message;
-      messageDiv.style.color = "red";
-      messageDiv.style.textAlign = "center";
-      mainContainer.appendChild(messageDiv);
-			mainProgressBar.hidden = true;
+  function showError(message) {
+    let messageDiv = document.createElement("h6");
+    messageDiv.innerText = message;
+    messageDiv.style.color = "red";
+    messageDiv.style.textAlign = "center";
+    mainContainer.appendChild(messageDiv);
+    mainProgressBar.hidden = true;
   }
 
   // TODO find a better way to write this whole function
   // so it's shorter and less confusing. Can definitely be broken up.
-  function addCardsToDOM(json){
-		if (!json){
-			showError("API Query Failed :(");
-		}
-		if (json.validation_error){
-			showError("Validation Error (Check Filters)");
-		}
+  function addCardsToDOM(json) {
+    if (!json) {
+      showError("API Query Failed :(");
+    }
+    if (json.validation_error) {
+      showError("Validation Error (Check Filters)");
+    }
     // If no results are found display this message
-    if (json.result_count === 0 || json.results.length === 0){
+    if (json.result_count === 0 || json.results.length === 0) {
       showError("No images were found :(");
     }
 
 
     for (let i = 0; i < json.results.length; i++) {
       let result = json.results[i];
-      function Card(){
+
+      function Card() {
         //// Elements ////
         this.div = document.createElement("div");
         this.title_div = document.createElement("div");
@@ -346,7 +349,8 @@
         this.actions_div.appendChild(this.actions);
 
         ////  Content  ////
-        this.title.innerHTML = "<b>" + result.title + "</b>" + "  <i>by</i>  " + "<b>" + result.creator + "</b>" + "  <i>license: </i>  " + "<b>" + result.license.toUpperCase() + " " + result.license_version + "</b>";
+        this.title.innerHTML = "<b>" + result.title + "</b>" + "  <i>by</i>  " + "<b>" + result.creator + "</b>" +
+          "  <i>license: </i>  " + "<b>" + result.license.toUpperCase() + " " + result.license_version + "</b>";
         if (json.results[i].thumbnail) {
           this.media_div.style.backgroundImage = "url(" + result.thumbnail + ")";
         } else {
@@ -369,7 +373,8 @@
         this.media_div.style.height = "200px";
         this.media_div.style.margin = "5px";
         //Card Add Button Style
-        this.add_button.classList.add("mdl-button", "mdl-js-button", "mdl-button--fab", "mdl-button--mini-fab", "mdl-js-ripple-effect", "mdl-button--colored");
+        this.add_button.classList.add("mdl-button", "mdl-js-button", "mdl-button--fab", "mdl-button--mini-fab",
+          "mdl-js-ripple-effect", "mdl-button--colored");
         this.add_button.style.right = "8px";
         this.add_button.style.bottom = "8px";
         this.add_icon.classList.add("material-icons");
@@ -379,7 +384,7 @@
 
       function populateCardMenu(image_json) {
         let anchorInnerTexts = [
-					image_json.creator,
+          image_json.creator,
           "Image Landing Page",
           "Image URL",
           image_json.license.toUpperCase() + " " + image_json.license_version,
@@ -388,7 +393,7 @@
         ];
 
         let anchorHrefs = [
-					image_json.creator_url,
+          image_json.creator_url,
           image_json.foreign_landing_url,
           image_json.url,
           image_json.license_url,
@@ -396,13 +401,13 @@
           "https://ccsearch.creativecommons.org/photos/" + image_json.id
         ];
 
-        function getCardMenuElements(element){
+        function getCardMenuElements(element) {
           let elArray = [];
-          for (let i = 0; i <= 5; i++){
-            if (anchorHrefs[i]){
+          for (let i = 0; i <= 5; i++) {
+            if (anchorHrefs[i]) {
               let el = document.createElement(element);
               elArray.push(el);
-              if (element === "a"){
+              if (element === "a") {
                 el.innerText = anchorInnerTexts[i];
                 el.href = anchorHrefs[i];
                 el.target = "_blank";
@@ -417,12 +422,12 @@
         let cardMenuAnchors = getCardMenuElements("a");
 
         // Add chip class to each card menu item
-        cardMenuButtons.forEach((el,ind) => {
+        cardMenuButtons.forEach((el, ind) => {
           el.classList.add("mdl-chip");
           el.appendChild(cardMenuSpans[ind]);
           current_card.actions.appendChild(el);
         });
-        cardMenuSpans.forEach((el,ind) => {
+        cardMenuSpans.forEach((el, ind) => {
           el.classList.add("mdl-chip__text");
           el.appendChild(cardMenuAnchors[ind]);
         });
@@ -430,7 +435,8 @@
         // When add button is clicked create attribution string and send it to the google script runner.
         // https://developers.google.com/apps-script/guides/html/reference/run
         current_card.add_button.addEventListener("click", function () {
-          let shortAttrib = "\"" + image_json.title + "\"" + " by " + image_json.creator + " is licensed under CC " + image_json.license.toUpperCase() + " " + image_json.license_version + ".";
+          let shortAttrib = "\"" + image_json.title + "\"" + " by " + image_json.creator +
+            " is licensed under CC " + image_json.license.toUpperCase() + " " + image_json.license_version + ".";
           google.script.run.insertImage(result.url, shortAttrib, imagesInserted + 1, attributionLocation);
           imagesInserted++;
         });
@@ -445,10 +451,10 @@
     } // End loop for JSON results
 
     // Loads more data when the bottom of the container is reached
-    mainContainer.addEventListener('scroll', function(e){
+    mainContainer.addEventListener('scroll', function (e) {
       let container = e.target;
-      if (container.scrollHeight - container.scrollTop === container.clientHeight){
-        if (page_count < json.page_count){
+      if (container.scrollHeight - container.scrollTop === container.clientHeight) {
+        if (page_count < json.page_count) {
           page_count++;
           queryApi().then(data => addCardsToDOM(data));
         }
@@ -461,7 +467,7 @@
 
   // Sets up settings drawer and adds initial content
   function initSettingsDrawer() {
-    layoutBackButton.addEventListener("click", function(e){
+    layoutBackButton.addEventListener("click", function (e) {
       layoutDiv.MaterialLayout.toggleDrawer();
     });
 
@@ -481,12 +487,12 @@
   }
 
   // Initialize search bar
-  function initSearchInput(){
+  function initSearchInput() {
 
-    function doSearch(){
+    function doSearch() {
       mainProgressBar.hidden = false;
       clearImages();
-      if (!searchEl.value){
+      if (!searchEl.value) {
         showError("Please enter a search query");
         mainProgressBar.hidden = true;
         return;
@@ -494,25 +500,23 @@
       queryApi().then(data => addCardsToDOM(data));
     }
 
-    searchEl.addEventListener("keypress", function(e){
-      if(e.code === "Enter"){
+    searchEl.addEventListener("keypress", function (e) {
+      if (e.code === "Enter") {
         doSearch();
       }
     });
 
-    searchIcon.addEventListener("click", function(e){
+    searchIcon.addEventListener("click", function (e) {
       doSearch();
     });
 
   }
 
   // Wait for initial DOM to load before populating it with JS
-  document.addEventListener("DOMContentLoaded", function(e){
+  document.addEventListener("DOMContentLoaded", function (e) {
     initSettingsDrawer();
     initSearchInput();
     mainProgressBar.hidden = true;
     layoutDiv.hidden = false;
   });
-
 </script>
-
