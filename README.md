@@ -1,6 +1,6 @@
-## CC Image Search addon for G Suite
+# CC Image Search addon for G Suite
 
-### This is an addon in development for Google Slides and Google Docs
+## This is an addon in development for Google Slides and Google Docs
 
 The idea of this addon is that a user should be able to search for CC licensed images
 and easily insert them into the current slide/doc along with proper attribution with only one click.
